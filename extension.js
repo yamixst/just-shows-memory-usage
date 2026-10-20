@@ -85,10 +85,10 @@ export default class JustShowsMemoryExtension extends Extension {
 
     disable() {
         GLib.source_remove(this._timeout);
-        this._indicator.destroy();
-        this._indicator = null;
         this._label.destroy();
         this._label = null;
+        this._indicator.destroy();
+        this._indicator = null;
         this._timeout = null;
 
         if (this._digitsHandler) {
