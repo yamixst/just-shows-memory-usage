@@ -43,10 +43,6 @@ export default class JustShowsMemoryExtension extends Extension {
         this._digits = this._settings.get_uint('digits');
         this._displayMode = this._settings.get_uint('display-mode');
 
-        this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, this._settings.get_uint('timeout'), () => {
-            this._refresh();
-            return true;
-        });
         Main.panel.addToStatusArea("Just memory usage Indicator", this._indicator);
 
         this._indicator.menu.addAction(_('Preferences'),
@@ -81,6 +77,11 @@ export default class JustShowsMemoryExtension extends Extension {
 
         this._indicator.add_child(this._label);
         this._refresh();
+
+        this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, this._settings.get_uint('timeout'), () => {
+            this._refresh();
+            return true;
+        });
     }
 
     disable() {
