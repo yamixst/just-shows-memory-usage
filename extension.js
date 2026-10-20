@@ -70,7 +70,6 @@ export default class JustShowsMemoryExtension extends Extension {
         this._label = new St.Label({
             text: 'Just memory usage',
             y_align: Clutter.ActorAlign.CENTER,
-            style_class: 'panel-button',
             track_hover: false,
             reactive: false
         });
