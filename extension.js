@@ -37,6 +37,22 @@ export default class JustShowsMemoryExtension extends Extension {
         this._label.set_text(text);
     }
 
+    _startTimeout() {
+        if (this._timeout) {
+            GLib.source_remove(this._timeout);
+            this._timeout = null;
+        }
+
+        this._timeout = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT,
+            this._settings.get_uint('timeout'),
+            () => {
+                this._refresh();
+                return GLib.SOURCE_CONTINUE;
+            }
+        );
+    }
+
     enable() {
         this._indicator = new PanelMenu.Button(0.0, "Just memory usage", false);
         this._settings = this.getSettings();
@@ -58,13 +74,8 @@ export default class JustShowsMemoryExtension extends Extension {
             this._refresh();
         });
 
-        this._timeoutHandler = this._settings.connect('changed::timeout', (settings, key) => {
-            GLib.source_remove(this._timeout);
-
-            this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, settings.get_uint(key), () => {
-                this._refresh();
-                return true;
-            });
+        this._timeoutHandler = this._settings.connect('changed::timeout', () => {
+            this._startTimeout();
         });
 
         this._label = new St.Label({
@@ -76,20 +87,19 @@ export default class JustShowsMemoryExtension extends Extension {
 
         this._indicator.add_child(this._label);
         this._refresh();
-
-        this._timeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, this._settings.get_uint('timeout'), () => {
-            this._refresh();
-            return true;
-        });
+        this._startTimeout();
     }
 
     disable() {
-        GLib.source_remove(this._timeout);
+        if (this._timeout) {
+            GLib.source_remove(this._timeout);
+            this._timeout = null;
+        }
+
         this._label.destroy();
         this._label = null;
         this._indicator.destroy();
         this._indicator = null;
-        this._timeout = null;
 
         if (this._digitsHandler) {
             this._settings.disconnect(this._digitsHandler);
